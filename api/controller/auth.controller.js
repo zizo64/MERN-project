@@ -26,3 +26,25 @@ export const signIn=  async(req,res)=>{
 res.status(500).json(error.message)
   }
 }
+
+export const google=  async(req,res)=>{
+  const{name, email,photo}=req.body
+ try{
+     const user= await User.findOne({email})
+     if(user){
+      const token=jwt.sign({id:user._id},"zizoYasi")
+      res.cookie("access_tekon",token).status(200).json(user)
+     } 
+     else{
+      const generatedPassword= Math.random().toString(36).slice(-8)
+      const hashPasword= bcryotjs.hashSync(generatedPassword,10)
+      const newUser= new User({username: name.split(" ").join('')+Math.random().toString(36).slice(-4) , email, password:hashPasword, avatar: photo})
+      await newUser.save()
+      const token=jwt.sign({id:newUser._id},"zizoYasi")
+      res.cookie("access_tekon",token).status(200).json(newUser)
+     }
+   
+ } catch(error){
+res.status(500).json(error.message)
+ }
+}
